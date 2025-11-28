@@ -1,0 +1,5 @@
+{
+  "name": "TruthLens - AI Content Detector",
+  "description": "Upload photos or videos to analyze potential AI-generation artifacts using Gemini 2.5 Flash.",
+  "requestFramePermissions": []
+}
