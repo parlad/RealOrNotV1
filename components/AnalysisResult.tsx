@@ -11,10 +11,9 @@ interface AnalysisResultProps {
 }
 
 const AnalysisResultView: React.FC<AnalysisResultProps> = ({ result, fileUrl, fileType, onReset, onAnalyzeNew }) => {
-  const { isLikelyAI, confidenceScore, verdict, reasoning, artifactsFound, annotatedArtifacts, technicalAnalysis } = result;
+  const { isLikelyAI, confidenceScore, suggestedTitle, verdict, reasoning, artifactsFound, annotatedArtifacts, technicalAnalysis } = result;
   
   const [hoveredArtifactIndex, setHoveredArtifactIndex] = useState<number | null>(null);
-  const [isArtifactsSectionOpen, setIsArtifactsSectionOpen] = useState(true);
   const [expandedArtifactIndices, setExpandedArtifactIndices] = useState<Set<number>>(new Set());
 
   const toggleArtifact = (index: number) => {
@@ -29,7 +28,6 @@ const AnalysisResultView: React.FC<AnalysisResultProps> = ({ result, fileUrl, fi
 
   const isSafe = !isLikelyAI;
   const colorClass = isSafe ? 'text-accent-400' : 'text-rose-400';
-  const bgClass = isSafe ? 'bg-accent-500' : 'bg-rose-500';
   const borderClass = isSafe ? 'border-accent-500/20' : 'border-rose-500/20';
 
   return (
@@ -38,9 +36,14 @@ const AnalysisResultView: React.FC<AnalysisResultProps> = ({ result, fileUrl, fi
       {/* 1. Header Result Card */}
       <div className={`glass-panel rounded-3xl p-10 border ${borderClass} relative overflow-hidden shadow-2xl`}>
         <div className="flex flex-col md:flex-row justify-between items-start md:items-center gap-6">
-          <div className="space-y-2">
-            <h2 className="text-slate-500 text-[10px] uppercase tracking-widest font-black">Analysis Result</h2>
-            <h1 className={`text-5xl md:text-6xl font-black ${colorClass} tracking-tight`}>
+          <div className="space-y-2 min-w-0 flex-1">
+            <div className="flex items-center gap-2">
+              <h2 className="text-slate-500 text-[10px] uppercase tracking-widest font-black">Analysis Result</h2>
+              {suggestedTitle && (
+                <span className="text-slate-600 text-[10px] uppercase font-bold tracking-widest">• {suggestedTitle}</span>
+              )}
+            </div>
+            <h1 className={`text-4xl md:text-6xl font-black ${colorClass} tracking-tight truncate`}>
               {verdict}
             </h1>
           </div>

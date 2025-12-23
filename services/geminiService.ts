@@ -12,6 +12,7 @@ GUIDELINES:
 2. **Be Objective**: Real photos have imperfections, grain, and consistent physics. AI often fails at complex fine details like text or intricate backgrounds.
 3. **Be Helpful**: Explain your findings clearly. If you are unsure, explain why.
 4. **Visual Cues**: Provide bounding boxes [ymin, xmin, ymax, xmax] (0-1000 scale) for specific visual indicators of AI generation.
+5. **Human-Readable Title**: Generate a very short (3-5 words) descriptive title of what is shown in the media (e.g., "A green tree in a field", "Person working on laptop", "Portrait of a golden retriever").
 
 OUTPUT RULES:
 - Provide a confidence score (0-100) reflecting how likely the content is AI-generated.
@@ -24,7 +25,6 @@ export const analyzeMedia = async (
   mimeType: string
 ): Promise<DetectionResult> => {
   try {
-    // Using gemini-3-flash-preview for fast utility-level analysis
     const response = await ai.models.generateContent({
       model: "gemini-3-flash-preview",
       contents: {
@@ -36,7 +36,7 @@ export const analyzeMedia = async (
             },
           },
           {
-            text: "Examine this media carefully. Does it look AI-generated? Identify any visual cues.",
+            text: "Examine this media carefully. Provide a descriptive 3-5 word title for it and determine if it looks AI-generated.",
           },
         ],
       },
@@ -54,6 +54,10 @@ export const analyzeMedia = async (
             confidenceScore: {
               type: Type.NUMBER,
               description: "Confidence score between 0 and 100.",
+            },
+            suggestedTitle: {
+              type: Type.STRING,
+              description: "A short descriptive title for the image/video content.",
             },
             verdict: {
               type: Type.STRING,
@@ -90,7 +94,7 @@ export const analyzeMedia = async (
               description: "A brief breakdown of lighting and details.",
             },
           },
-          required: ["isLikelyAI", "confidenceScore", "verdict", "reasoning", "artifactsFound", "annotatedArtifacts", "technicalAnalysis"],
+          required: ["isLikelyAI", "confidenceScore", "suggestedTitle", "verdict", "reasoning", "artifactsFound", "annotatedArtifacts", "technicalAnalysis"],
         },
       },
     });

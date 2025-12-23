@@ -1,3 +1,4 @@
+
 export interface AnnotatedArtifact {
   label: string;
   description: string;
@@ -9,6 +10,7 @@ export interface DetectionResult {
   confidenceScore: number;
   verdict: string;
   reasoning: string;
+  suggestedTitle: string; // Added: A descriptive title for the media
   artifactsFound: string[];
   annotatedArtifacts: AnnotatedArtifact[];
   technicalAnalysis: string;
@@ -20,6 +22,23 @@ export enum AnalysisStatus {
   ANALYZING = 'ANALYZING',
   COMPLETE = 'COMPLETE',
   ERROR = 'ERROR',
+  LIMIT_REACHED = 'LIMIT_REACHED'
+}
+
+export interface User {
+  email: string;
+  isPro: boolean;
+  isOwner: boolean;
+}
+
+export interface HistoryItem {
+  id: string;
+  timestamp: number;
+  fileName: string;
+  fileType: FileType;
+  result: DetectionResult;
+  fileData?: string; // Base64 data for persistence
+  mimeType?: string;
 }
 
 export type FileType = 'image' | 'video' | 'unknown';

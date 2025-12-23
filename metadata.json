@@ -1,5 +1,5 @@
 {
-  "name": "GenAI Checker - AI Media Detection",
-  "description": "A quick utility to check if your photos and videos were created by AI.",
+  "name": "truthlens-ai-content-detector",
+  "description": "AI or Real - Advanced AI media detection utility for photos and videos.",
   "requestFramePermissions": []
 }
