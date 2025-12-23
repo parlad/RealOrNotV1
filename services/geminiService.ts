@@ -1,23 +1,22 @@
+
 import { GoogleGenAI, Type } from "@google/genai";
 import { DetectionResult } from "../types";
 
 const ai = new GoogleGenAI({ apiKey: process.env.API_KEY });
 
 const SYSTEM_INSTRUCTION = `
-You are a deterministic, strict Digital Forensics Expert. Your job is to classify media as "AI-Generated" or "Authentic" with high consistency.
+You are an AI Content Analyst. Your goal is to help users understand if a piece of media (image or video) was likely created by generative AI or if it appears to be a real, authentic capture.
 
-PROTOCOL:
-1.  **Scan for Fatal Flaws**: Look immediately for impossible physics, nonsensical text, extra fingers, or melted textures.
-2.  **Analyze Texture**: Real photos have noise and grain. AI often has "plastic" smoothing or illogical high-frequency details.
-3.  **Check Lighting**: Do shadows match the light source?
-4.  **Consistency Check**: If the image is a generic landscape/object with no obvious artifacts, favor "Authentic". Only flag "AI-Generated" if there is positive evidence (artifacts), not just a "feeling".
+GUIDELINES:
+1. **Look for AI Artifacts**: Scan for common generative patterns like warped anatomy, impossible textures, lighting inconsistencies, or "perfect" smoothing.
+2. **Be Objective**: Real photos have imperfections, grain, and consistent physics. AI often fails at complex fine details like text or intricate backgrounds.
+3. **Be Helpful**: Explain your findings clearly. If you are unsure, explain why.
+4. **Visual Cues**: Provide bounding boxes [ymin, xmin, ymax, xmax] (0-1000 scale) for specific visual indicators of AI generation.
 
 OUTPUT RULES:
-- If you find specific artifacts (e.g., warped hands), confidence should be > 80%.
-- If you find no specific artifacts, verdict must be "Likely Authentic" with low confidence in AI generation (e.g., < 20%).
-- **annotatedArtifacts**: You MUST provide 2D bounding boxes [ymin, xmin, ymax, xmax] (0-1000 scale) for every artifact listed.
-- **description**: For every artifact, provide a short, specific sentence explaining WHY it looks fake (e.g., "Fingers blend into the coffee cup handle.").
-- Do not hallucinate artifacts. If none are found, return an empty list.
+- Provide a confidence score (0-100) reflecting how likely the content is AI-generated.
+- If no artifacts are found, return an empty list of annotatedArtifacts.
+- Keep the technical analysis easy to understand for everyday users.
 `;
 
 export const analyzeMedia = async (
@@ -25,8 +24,9 @@ export const analyzeMedia = async (
   mimeType: string
 ): Promise<DetectionResult> => {
   try {
+    // Using gemini-3-flash-preview for fast utility-level analysis
     const response = await ai.models.generateContent({
-      model: "gemini-2.5-flash",
+      model: "gemini-3-flash-preview",
       contents: {
         parts: [
           {
@@ -36,23 +36,20 @@ export const analyzeMedia = async (
             },
           },
           {
-            text: "Analyze this image strictly. Is it AI? List clear visual evidence with bounding boxes if yes.",
+            text: "Examine this media carefully. Does it look AI-generated? Identify any visual cues.",
           },
         ],
       },
       config: {
         systemInstruction: SYSTEM_INSTRUCTION,
-        temperature: 0, // CRITICAL: Zero temperature for maximum determinism
-        topP: 0.95,
-        topK: 40,
-        seed: 42, // CRITICAL: Fixed seed to ensure same input = same output
+        temperature: 0,
         responseMimeType: "application/json",
         responseSchema: {
           type: Type.OBJECT,
           properties: {
             isLikelyAI: {
               type: Type.BOOLEAN,
-              description: "True if the content is likely AI-generated, false otherwise.",
+              description: "True if the content is likely AI-generated.",
             },
             confidenceScore: {
               type: Type.NUMBER,
@@ -60,29 +57,29 @@ export const analyzeMedia = async (
             },
             verdict: {
               type: Type.STRING,
-              description: "A short verdict title like 'Highly Likely AI-Generated' or 'Likely Authentic'.",
+              description: "A short result title like 'Likely AI' or 'Appears Real'.",
             },
             reasoning: {
               type: Type.STRING,
-              description: "A concise paragraph explaining the main reasons for the verdict.",
+              description: "A simple explanation of the result.",
             },
             artifactsFound: {
               type: Type.ARRAY,
               items: { type: Type.STRING },
-              description: "List of specific visual artifacts or indicators found.",
+              description: "List of visual patterns noticed.",
             },
             annotatedArtifacts: {
               type: Type.ARRAY,
-              description: "List of visual artifacts with bounding boxes.",
+              description: "List of visual markers with bounding boxes.",
               items: {
                 type: Type.OBJECT,
                 properties: {
-                  label: { type: Type.STRING, description: "Short label for the artifact (e.g. 'Distorted Hand')" },
-                  description: { type: Type.STRING, description: "Specific explanation of the visual flaw." },
+                  label: { type: Type.STRING, description: "Short label (e.g. 'Warped Texture')" },
+                  description: { type: Type.STRING, description: "Why this looks like AI." },
                   box_2d: { 
                     type: Type.ARRAY, 
                     items: { type: Type.NUMBER },
-                    description: "Bounding box [ymin, xmin, ymax, xmax] normalized to 0-1000."
+                    description: "Bounding box [ymin, xmin, ymax, xmax]."
                   }
                 },
                 required: ["label", "description", "box_2d"]
@@ -90,7 +87,7 @@ export const analyzeMedia = async (
             },
             technicalAnalysis: {
               type: Type.STRING,
-              description: "A deeper technical breakdown of lighting, texture, and physics consistency.",
+              description: "A brief breakdown of lighting and details.",
             },
           },
           required: ["isLikelyAI", "confidenceScore", "verdict", "reasoning", "artifactsFound", "annotatedArtifacts", "technicalAnalysis"],
@@ -99,13 +96,12 @@ export const analyzeMedia = async (
     });
 
     if (!response.text) {
-      throw new Error("No response text received from Gemini.");
+      throw new Error("No response received.");
     }
 
-    const result = JSON.parse(response.text) as DetectionResult;
-    return result;
+    return JSON.parse(response.text) as DetectionResult;
   } catch (error) {
     console.error("Analysis failed:", error);
-    throw new Error("Failed to analyze the media. Please try again.");
+    throw new Error("Could not complete the check. Please try again.");
   }
 };

@@ -1,5 +1,5 @@
 {
-  "name": "TruthLens - AI Content Detector",
-  "description": "Upload photos or videos to analyze potential AI-generation artifacts using Gemini 2.5 Flash.",
+  "name": "GenAI Checker - AI Media Detection",
+  "description": "A quick utility to check if your photos and videos were created by AI.",
   "requestFramePermissions": []
 }

@@ -1,9 +1,19 @@
+
 <!DOCTYPE html>
 <html lang="en">
   <head>
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-    <title>TruthLens - AI Content Detector</title>
+    <title>GenAI Checker - Is it AI or Real?</title>
+    <meta name="description" content="Quickly check if images or videos are AI-generated using smart neural analysis." />
+    <meta name="keywords" content="AI detection, check AI image, AI video detector, verify media, AI or real" />
+    
+    <!-- Open Graph / Facebook -->
+    <meta property="og:type" content="website" />
+    <meta property="og:url" content="https://genaichecker.app/" />
+    <meta property="og:title" content="GenAI Checker - Is it AI or Real?" />
+    <meta property="og:description" content="Quickly identify AI-generated media with smart visual analysis." />
+
     <script src="https://cdn.tailwindcss.com"></script>
     <script>
       tailwind.config = {
@@ -11,26 +21,29 @@
           extend: {
             colors: {
               brand: {
-                50: '#f0f9ff',
-                100: '#e0f2fe',
-                400: '#38bdf8',
-                500: '#0ea5e9',
-                600: '#0284c7',
-                900: '#0c4a6e',
+                400: '#818cf8', 
+                500: '#6366f1',
+                600: '#4f46e5',
               },
               accent: {
-                500: '#8b5cf6',
-                600: '#7c3aed',
+                400: '#22d3ee', 
+                500: '#06b6d4',
+                600: '#0891b2',
               }
             },
             animation: {
-              'pulse-slow': 'pulse 3s cubic-bezier(0.4, 0, 0.6, 1) infinite',
-              'scan': 'scan 2s linear infinite',
+              'pulse-slow': 'pulse 4s cubic-bezier(0.4, 0, 0.6, 1) infinite',
+              'scan': 'scan 3s ease-in-out infinite',
+              'float': 'float 10s ease-in-out infinite',
             },
             keyframes: {
               scan: {
-                '0%': { transform: 'translateY(0)' },
-                '100%': { transform: 'translateY(100%)' },
+                '0%, 100%': { transform: 'translateY(0)', opacity: 0.2 },
+                '50%': { transform: 'translateY(300%)', opacity: 1 },
+              },
+              float: {
+                '0%, 100%': { transform: 'translateY(0) scale(1)' },
+                '50%': { transform: 'translateY(-40px) scale(1.05)' },
               }
             }
           },
@@ -38,15 +51,37 @@
       }
     </script>
     <style>
+      @import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;600;800;900&display=swap');
+      
       body {
-        background-color: #0f172a;
-        color: #f8fafc;
+        background-color: #020617;
+        color: #f9fafb;
         font-family: 'Inter', sans-serif;
       }
       .glass-panel {
-        background: rgba(30, 41, 59, 0.7);
-        backdrop-filter: blur(10px);
-        border: 1px solid rgba(255, 255, 255, 0.1);
+        background: rgba(15, 23, 42, 0.4);
+        backdrop-filter: blur(20px);
+        border: 1px solid rgba(255, 255, 255, 0.05);
+      }
+      .mesh-bg {
+        background-image: 
+          radial-gradient(at 0% 0%, rgba(99, 102, 241, 0.08) 0px, transparent 50%),
+          radial-gradient(at 100% 100%, rgba(6, 182, 212, 0.08) 0px, transparent 50%),
+          radial-gradient(at 50% 0%, rgba(79, 70, 229, 0.05) 0px, transparent 40%);
+        background-attachment: fixed;
+      }
+      ::-webkit-scrollbar {
+        width: 8px;
+      }
+      ::-webkit-scrollbar-track {
+        background: #020617;
+      }
+      ::-webkit-scrollbar-thumb {
+        background: #1e293b;
+        border-radius: 4px;
+      }
+      ::-webkit-scrollbar-thumb:hover {
+        background: #334155;
       }
     </style>
   <script type="importmap">
@@ -60,7 +95,7 @@
 }
 </script>
 </head>
-  <body>
+  <body class="mesh-bg">
     <div id="root"></div>
   </body>
 </html>
